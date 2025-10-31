@@ -1,8 +1,6 @@
-# Universal Unity VR
+# Universal Unity VR For Modern IL2CPP Unity
 
-[![Raicuparta's VR mods](https://raicuparta.com/img/badge.svg)](https://raicuparta.com)
 
-Use [Rai Pal](https://pal.raicuparta.com) to install this mod.
 
 ## License
 
