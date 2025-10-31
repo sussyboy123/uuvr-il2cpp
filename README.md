@@ -2,7 +2,7 @@
 
 > **Maintenance status:** This fork may be abandoned soon. I'm experimenting with getting UUVR running on modern IL2CPP Unity titles, as long as it doesn't become too much work.
 
-This repository contains a lightly opinionated fork of [Raicuparta's Universal Unity VR (UUVR)](https://github.com/Raicuparta/UniversalUnityVR), tailored for Unity games that ship solely with contemporary IL2CPP runtimes. It keeps the original vision—turn any flat Unity game into a VR experience with minimal per-game code—while updating the bootstrap, XR shims, and deployment flow so they survive engine changes introduced in Unity 2021+.
+This repository contains a lightly opinionated fork of [Raicuparta's Universal Unity VR (UUVR)](https://github.com/Raicuparta/uuvr), tailored for Unity games that ship solely with contemporary IL2CPP runtimes. It keeps the original vision—turn any flat Unity game into a VR experience with minimal per-game code—while updating the bootstrap, XR shims, and deployment flow so they survive engine changes introduced in Unity 2021+.
 
 ## Why this fork exists
 
