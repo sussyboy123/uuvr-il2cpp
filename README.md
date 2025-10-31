@@ -2,36 +2,71 @@
 
 > **Maintenance status:** This fork may be abandoned soon. I'm experimenting with getting UUVR running on modern IL2CPP Unity titles, as long as it doesn't become too much work.
 
-Universal Unity VR (UUVR) is a BepInEx-based mod that injects VR support into Unity games that ship as modern IL2CPP builds. This fork tracks recent Unity runtime changes and adapts the original project so that VR camera control, UI mirroring, and runtime configuration continue to function on newer IL2CPP releases.
+This repository contains a lightly opinionated fork of [Raicuparta's Universal Unity VR (UUVR)](https://github.com/Raicuparta/UniversalUnityVR), tailored for Unity games that ship solely with contemporary IL2CPP runtimes. It keeps the original vision—turn any flat Unity game into a VR experience with minimal per-game code—while updating the bootstrap, XR shims, and deployment flow so they survive engine changes introduced in Unity 2021+.
 
-## Project overview
-* **Plugin bootstrap** – `UuvrCore` loads as a persistent host object that registers IL2CPP-safe behaviours, installs Harmony patches, and coordinates VR mode toggling within the target game session.
-* **Camera management** – `VrCameraManager` discovers every in-game camera, attaches VR-aware wrappers, and keeps stereoscopic rendering synchronised with the user’s headset.
-* **Configurable runtime** – `ModConfiguration` exposes BepInEx configuration entries to tune camera tracking, depth overrides, physics timing, UI handling, and other per-game quirks without modifying code.
-* **In-game UI adaptation** – `VrUiManager` renders the flat-screen UI to textures, projects them into VR space, and swaps between overlay, in-world, or mirrored presentation based on the active configuration.
-* **Session resilience** – The core systems persist across scene loads, automatically re-create themselves if destroyed, and align Unity physics timing with the HMD refresh rate when requested.
+## Why this fork exists
 
-## Supporting projects
-The repository bundles several auxiliary components that replicate Unity’s XR packages and platform shims often missing from IL2CPP-only builds:
+Modern IL2CPP builds regularly break the assumptions made by the legacy UUVR project. This fork aims to:
 
-* **`Uuvr.Patcher`** – Pre-game patcher that copies managed assemblies and native plugins, strips conflicting VR binaries, and can rewrite Unity asset metadata for legacy XR enablement.
-* **`Uuvr.XR.Management`** – Re-implementation of Unity’s XR Management runtime objects so loaders can boot the chosen backend at runtime.
-* **`Uuvr.XR.OpenXR`** – Custom OpenXR loader pipeline that creates XR subsystems, loads symbols, and prioritises features in the absence of Unity’s official package.
-* **`Uuvr.XR.OpenVR`** – OpenVR loader with input layout registration and runtime initialisation for Valve’s platform.
-* **`Uuvr.SteamVR`** – Bundled SteamVR helper scripts for projects expecting those APIs.
-* **`Uuvr.XInput`** – Lightweight Windows DLL stub that provides deterministic controller state to prevent missing-DLL crashes.
+* Track Unity API and metadata changes that impact IL2CPP patching.
+* Provide up-to-date XR loader shims (OpenXR, OpenVR, SteamVR) compatible with current runtimes.
+* Smooth out the deployment pipeline so the mod remains simple to drop into new games.
+* Offer a staging ground for experiments—features may land here before they are proposed upstream.
 
-## Getting started
-1. Install BepInEx into your target Unity IL2CPP game (see the [BepInEx documentation](https://docs.bepinex.dev/articles/user_guide/installation/index.html)).
-2. Build the solution (`UnityUniversalVr.sln`) using a recent version of Visual Studio or `dotnet build`.
-3. Copy the produced assemblies and native plugins into the appropriate directories of the target game, mirroring how the `Uuvr.Patcher` project deploys them.
-4. Launch the game and use the configured hotkeys to toggle VR mode and adjust runtime behaviour.
+Because this work happens in spare time, expect rough edges and incomplete documentation. Feedback is appreciated, but long-term maintenance is not promised.
 
-Because this fork is experimental, expect breaking changes and limited support. Contributions and issue reports are welcome, but please understand that long-term maintenance is not guaranteed.
+## Key systems
+
+| Area | Description |
+| --- | --- |
+| **Plugin bootstrap** | `UuvrCore` is injected as a persistent host object that registers IL2CPP-safe behaviours, installs Harmony patches, and coordinates VR mode toggling inside the running game. |
+| **Camera management** | `VrCameraManager` discovers every in-game camera, attaches VR-aware wrappers, and keeps stereoscopic rendering synchronised with the active headset pose. |
+| **Runtime configuration** | `ModConfiguration` exposes BepInEx configuration entries for camera tracking, depth overrides, physics timing, UI handling, and per-title quirks. |
+| **UI reprojection** | `VrUiManager` renders flat UIs to textures, then projects them as in-world canvases, overlays, or mirrored quads depending on configuration. |
+| **Session resilience** | Core systems survive scene loads, rebuild themselves when destroyed, and align Unity physics timing with HMD refresh rates when requested. |
+
+## Repository layout
+
+* `Uuvr/` – Core managed mod that plugs into IL2CPP via BepInEx and orchestrates the VR runtime.
+* `Uuvr.Patcher/` – Standalone patcher that copies managed assemblies, native plugins, and removes conflicting XR binaries before the game boots.
+* `Uuvr.XR.Management/` – Drop-in replacement for Unity's XR Management package so XR loaders can start without the official dependency.
+* `Uuvr.XR.OpenXR/` – Re-implementation of the OpenXR loader pipeline tailored for stripped IL2CPP players.
+* `Uuvr.XR.OpenVR/` – OpenVR bootstrap including optional input-system registration for Valve runtimes.
+* `Uuvr.SteamVR/` – Embedded SteamVR helper scripts for games compiled with those references.
+* `Uuvr.XInput/` – Minimal Windows DLL stub that prevents missing XInput failures while VR hardware handles input.
+
+## Building the mod
+
+1. Install [BepInEx](https://docs.bepinex.dev/articles/user_guide/installation/index.html) into the target IL2CPP Unity game.
+2. Clone this repository and open `UnityUniversalVr.sln` with Visual Studio 2022 or run `dotnet build` from the repo root.
+3. Build in `Release` for your platform. The output lives in each project's `bin/Release` folder.
+4. Copy the produced assemblies and native plugins into the appropriate directories of the target game. The `Uuvr.Patcher` project automates this layout if you prefer scripted deployment.
+
+## Configuring in-game behaviour
+
+Configuration is handled through BepInEx config files stored under `BepInEx/config/`. Key settings include:
+
+* **Tracking and alignment** – control world-to-headset alignment, seated vs. standing offsets, and depth overrides.
+* **UI presentation** – choose between overlay, curved, or world-space canvases for the flat HUD.
+* **Performance** – tweak physics update cadence and enable headset-refresh synchronisation.
+* **Input** – toggle experimental controller mappings or fall back to gamepad emulation.
+
+Consult the generated config file after the first run for the full list of options and inline documentation.
+
+## Troubleshooting tips
+
+* Verify BepInEx is actually loading IL2CPP assemblies (`BepInEx/LogOutput.log` should mention `UniversalUnityVR`).
+* If the game crashes on startup, remove pre-existing `Unity.XR.*` plugins—Unity can fail when multiple XR providers compete.
+* Use `doorstop_config.ini` to enable the debugger and attach a managed debugger for deeper inspection.
+* When in doubt, start with the `Uuvr.Patcher` output to ensure all required files are present.
+
+## Contributing
+
+Bug reports, minimal repro projects, and documentation fixes are all welcome. Pull requests are reviewed on a best-effort basis—if maintaining parity with upstream becomes too time-consuming, this fork may freeze in whatever state it currently occupies.
 
 ## License
 
-```
+```text
 Rai Pal
 Copyright (C) 2024  Raicuparta
 
