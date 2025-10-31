@@ -1,6 +1,6 @@
 # Universal Unity VR for Modern IL2CPP Unity Games
 
-> **Maintenance status:** This fork may be abandoned soon. I'm experimenting with getting UUVR running on modern IL2CPP Unity titles, as long as it doesn't become too much work.
+> **Maintenance status:** This fork may be abandoned soon. I'm experimenting with getting UUVR running on modern IL2CPP Unity titles, as long as it doesn't become too much work or being out of luck.
 
 > **NOTE**: This is a AI-Driven project, Expect some sloppy code and bad stuff in the mod
 
